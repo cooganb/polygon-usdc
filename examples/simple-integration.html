@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDC Payment Widget - Dynamic Integration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .payment-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        
+        .config-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .payment-section h3, .config-panel h3 {
+            color: #4a5568;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .custom-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .custom-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .custom-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        
+        .preset-btn {
+            background: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #2f855a;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        
+        .current-config {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .iframe-container {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🪙 USDC Payment Widget - Dynamic Integration</h1>
+        <p>Configure payment details in real-time and test different integration methods with your custom settings.</p>
+
+        <!-- Global Configuration Panel -->
+        <div class="config-panel">
+            <h3>🔧 Global Payment Configuration</h3>
+            <p>Configure payment details that will be used across all integration methods:</p>
+            
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="applyPreset('coffee', '0x742d35Cc6634C0532925a3b8D1df3f4E3C42bAb5', '5.50', 'Coffee Shop Payment')">☕ Coffee Shop</button>
+                <button class="preset-btn" onclick="applyPreset('subscription', '0x1234567890123456789012345678901234567890', '29.99', 'Monthly Subscription')">📱 Subscription</button>
+                <button class="preset-btn" onclick="applyPreset('donation', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd', '10.00', 'Make a Donation')">💝 Donation</button>
+                <button class="preset-btn" onclick="clearConfig()">🗑️ Clear</button>
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <div class="input-group">
+                        <label for="recipient-input">Recipient Address</label>
+                        <input type="text" id="recipient-input" class="form-input" placeholder="0x..." oninput="updateConfig()">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="amount-input">Amount (USDC)</label>
+                        <input type="number" id="amount-input" class="form-input" placeholder="0.00" step="0.01" min="0" oninput="updateConfig()">
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="input-group">
+                        <label for="title-input">Payment Title</label>
+                        <input type="text" id="title-input" class="form-input" placeholder="Send USDC Payment" value="Send USDC Payment" oninput="updateConfig()">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="theme-select">Theme</label>
+                        <select id="theme-select" class="form-select" onchange="updateConfig()">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="current-config">
+                <strong>Current Configuration:</strong>
+                <div id="config-display">Please configure payment details above</div>
+            </div>
+        </div>
+
+        <!-- Method 1: Data Attributes -->
+        <div class="payment-section">
+            <h3>Method 1: Data Attributes (Auto-Updated)</h3>
+            <p>Buttons automatically update with your global configuration:</p>
+            
+            <div class="button-container">
+                <button id="data-attr-btn-1" class="custom-button" data-usdc-payment>
+                    Configure Payment Details
+                </button>
+                
+                <button id="data-attr-btn-2" class="custom-button" data-usdc-payment data-theme="dark">
+                    Configure Payment Details (Dark)
+                </button>
+            </div>
+            
+            <div class="code-block" id="data-attr-code">
+&lt;button data-usdc-payment data-recipient="..." data-amount="..." data-theme="light"&gt;
+    Pay X USDC
+&lt;/button&gt;
+            </div>
+        </div>
+
+        <!-- Method 2: Programmatic Widget -->
+        <div class="payment-section">
+            <h3>Method 2: Programmatic Control</h3>
+            <p>Direct JavaScript control with your configured settings:</p>
+            
+            <div class="button-container">
+                <button class="custom-button" onclick="openConfiguredPayment()" id="programmatic-btn" disabled>
+                    Configure Payment First
+                </button>
+            </div>
+            
+            <div class="code-block" id="programmatic-code">
+widget.open({
+    recipient: 'your-configured-recipient',
+    amount: 'your-configured-amount',
+    title: 'your-configured-title'
+});
+            </div>
+        </div>
+
+        <!-- Method 3: Dynamic Buttons -->
+        <div class="payment-section">
+            <h3>Method 3: SDK-Generated Buttons</h3>
+            <p>Buttons created programmatically with current config:</p>
+            
+            <div id="dynamic-buttons">
+                <em>Configure payment details to see generated buttons</em>
+            </div>
+            
+            <div class="code-block" id="dynamic-code">
+widget.createButton('#container', {
+    recipient: 'your-recipient',
+    amount: 'your-amount'
+}, 'Pay X USDC');
+            </div>
+        </div>
+
+        <!-- Method 4: Iframe Integration -->
+        <div class="payment-section">
+            <h3>Method 4: Iframe Integration</h3>
+            <p>Embedded iframe with dynamic URL generation:</p>
+            
+            <div class="iframe-container">
+                <iframe id="payment-iframe" width="100%" height="600" frameborder="0" style="background: #f8fafc; display: none;">
+                    Configure payment details to load iframe
+                </iframe>
+                <div id="iframe-placeholder" style="text-align: center; padding: 100px; color: #a0aec0;">
+                    📋 Configure payment details above to see iframe preview
+                </div>
+            </div>
+            
+            <div class="code-block" id="iframe-code">
+&lt;iframe src="https://your-domain.com/widget?recipient=...&amount=...&theme=..." /&gt;
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div id="status-container"></div>
+        
+        <!-- Load the widget script -->
+        <script>
+            // Configuration for the widget
+            window.usdcWidgetConfig = {
+                baseUrl: window.location.origin, // Use current domain for demo
+                theme: 'light',
+                onSuccess: function(result) {
+                    showStatus('Payment successful! Transaction: ' + result.hash, 'success');
+                },
+                onError: function(error) {
+                    showStatus('Payment failed: ' + error.error, 'error');
+                }
+            };
+        </script>
+        
+        <!-- In production, use your deployed widget script -->
+        <script src="/usdc-widget-embed.js"></script>
+        
+        <script>
+            // Custom payment function
+            function openCustomPayment() {
+                const amount = document.getElementById('custom-amount').value;
+                if (!amount || parseFloat(amount) <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                window.usdcWidget.open({
+                    recipient: '0x742d35Cc6634C0532925a3b8D1df3f4E3C42bAb5',
+                    amount: amount
+                });
+            }
+            
+            // Status display function
+            function showStatus(message, type) {
+                const container = document.getElementById('status-container');
+                container.innerHTML = `<div class="status ${type}">${message}</div>`;
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 10000);
+            }
+            
+            // Create dynamic buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const dynamicContainer = document.getElementById('dynamic-buttons');
+                
+                // Clear any existing content
+                dynamicContainer.innerHTML = '';
+                
+                // Create multiple dynamic buttons
+                const amounts = ['1.00', '10.00', '50.00', '100.00'];
+                
+                amounts.forEach(amount => {
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.style.cssText = 'display: inline-block; margin: 5px;';
+                    dynamicContainer.appendChild(buttonContainer);
+                    
+                    if (window.usdcWidget) {
+                        window.usdcWidget.createButton(buttonContainer, {
+                            recipient: '0x742d35Cc6634C0532925a3b8D1df3f4E3C42bAb5',
+                            amount: amount
+                        }, `Pay ${amount} USDC`);
+                    }
+                });
+            });
+            
+            // Example of handling widget events
+            window.addEventListener('message', function(event) {
+                console.log('Received message:', event.data);
+                
+                switch(event.data.type) {
+                    case 'USDC_PAYMENT_SUCCESS':
+                        console.log('Payment completed successfully:', event.data.data);
+                        break;
+                    case 'USDC_PAYMENT_ERROR':
+                        console.log('Payment failed:', event.data.data);
+                        break;
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
